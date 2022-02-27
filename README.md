@@ -27,7 +27,7 @@ First thing~! you must edit **Setting.ini** you will see
 **_AddGUI** : Add log data to GUI \
 **[Key]=[LogLevel]** \
 Key is FunctionName or Group of action name you want to log \
-LogLevel it's like a layer, just set them as same level you want to log \
+LogLevel it's like a layer, just set them as same level you want to log 
 
 Don't understand? just try to use with you self
 
