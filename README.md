@@ -29,6 +29,8 @@ First thing~! you must edit **Setting.ini** you will see
 Key is FunctionName or Group of action name you want to log \
 LogLevel it's like a layer, just set them as same level you want to log 
 
+> ProfileName and Key Naming it's same as variable (eg. no space)
+
 Don't understand? just try to use with you self
 
 now! you have 2 option to use
