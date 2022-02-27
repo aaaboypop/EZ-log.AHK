@@ -1,8 +1,3 @@
-If(A_ScriptName="Log_System.ahk"){
-	MsgBox, 0x10, Error, This File is path of main.ahk`, Don't run this file directly,
-	ExitApp
-}
-
 LoadLogSetting(){
 	global LogProfile, Logs
 	FileCreateDir, %A_ScriptDir%\Logs
