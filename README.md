@@ -21,13 +21,13 @@ First thing~! you must edit **Setting.ini** you will see
     _WriteFile=False
     _AddGUI=True
     Test=1
-**[ProfileName]** : This is your log profile name, Naming it's same as variable 
-**_LogLimit** : Lenth of log in profile, if log is exceed will drop oldest log (file is not effect)
-**_WriteFile** : Enable to write log file
-**_AddGUI** : Add log data to GUI
-**[Key]=[LogLevel]**
-Key is FunctionName or Group of action name you want to log
-LogLevel it's like a layer, just set them as same level you want to log
+**[ProfileName]** : This is your log profile name, Naming it's same as variable \
+**_LogLimit** : Lenth of log in profile, if log is exceed will drop oldest log (file is not effect) \
+**_WriteFile** : Enable to write log file \
+**_AddGUI** : Add log data to GUI \
+**[Key]=[LogLevel]** \
+Key is FunctionName or Group of action name you want to log \
+LogLevel it's like a layer, just set them as same level you want to log \
 
 Don't understand? just try to use with you self
 
