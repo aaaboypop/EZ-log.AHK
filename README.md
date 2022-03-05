@@ -5,6 +5,9 @@ just log system for ahk right?
 just include this lib to your file
 
     #Include, Log_System.ahk
+    LoadLogSetting()
+    CreateLogGUI()
+    
 **bam~!!** it's done. ready to work now
 
 # How to use
