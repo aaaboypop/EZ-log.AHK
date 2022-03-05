@@ -127,6 +127,20 @@ AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
 	Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
 }
 
+LVDel_FirstRow(ProfileName){
+	global LogGUI
+	;Save Last
+	Last_DefaultGui := A_DefaultGui 
+	Last_DefaultListView := A_DefaultListView
+	;Set Default to LogGUI
+	Gui, LogGUI:Default 
+	Gui, LogGUI:ListView, GuiLV_%ProfileName%	
+	LV_Delete(1) ; Delete First Row
+	; Set Default Back
+	Gui, %Last_DefaultGui%:Default 
+	Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
+}
+
 CreateLogGUI(){
 	global
 
@@ -138,7 +152,10 @@ CreateLogGUI(){
 
 	for i,v in LogProfile.List{
 		Gui, LogGUI:Tab, %v%
-		Gui, LogGUI:Add, ListView, r20 w710 vGuiLV_%v% , Time|Func|Detail
+		Gui, LogGUI:Add, ListView, r20 w710 vGuiLV_%v% hwndhwndLV_%v% , Time|Func|Detail
+		fn := Func("LogToClip").Bind()
+		hwndlv := hwndLV_%v%
+		GuiControl, +g, %hwndlv% , %fn%
 		LV_ModifyCol(1, 80)
 		LV_ModifyCol(2, 120)
 		LV_ModifyCol(3, 500)
@@ -147,15 +164,23 @@ CreateLogGUI(){
 	Gui, 1:New
 }
 
-LVDel_FirstRow(ProfileName){
+LogToClip(){
 	global LogGUI
 	;Save Last
 	Last_DefaultGui := A_DefaultGui 
 	Last_DefaultListView := A_DefaultListView
 	;Set Default to LogGUI
 	Gui, LogGUI:Default 
-	Gui, LogGUI:ListView, GuiLV_%ProfileName%	
-	LV_Delete(1) ; Delete First Row
+	Gui, LogGUI:ListView, %A_GuiControl%
+
+	if (A_GuiEvent = "DoubleClick")
+	{
+		LV_GetText(RowText, A_EventInfo, 3)
+		If (A_EventInfo > 0)
+		{
+			Clipboard := RowText
+		}
+	}	
 	; Set Default Back
 	Gui, %Last_DefaultGui%:Default 
 	Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
