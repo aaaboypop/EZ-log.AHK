@@ -10,12 +10,14 @@ LoadLogSetting(){
 _LogLimit=999
 _WriteFile=False
 _AddGUI=True
+_AddProgress=PG1,PG2
 User=1
 
 [TestArea]
 _LogLimit=999
 _WriteFile=False
 _AddGUI=True
+_AddProgress=PG3
 Test=1
 		)
 		FileAppend, %DefaultSetting%, %SettingPath%
@@ -28,7 +30,7 @@ Test=1
 	Loop, Parse, Setting, `n, `r
 	{
 		i := A_index
-		If RegExMatch(A_LoopField, "O)^\[(.*)\]$" , ObjMatch)
+		If RegExMatch(A_LoopField, "O)^\[(.*)\]$" , ObjMatch) ; Find ProfileName > Set Default value
 		{
 			ProfileName := ObjMatch.Value(1)
 			LogProfile[ProfileName] := {}
@@ -144,12 +146,15 @@ LVDel_FirstRow(ProfileName){
 CreateLogGUI(){
 	global
 
+	ProgressBar := {}
+	ProgressBar.HwndPB := {}
+	ProgressBar.HwndText := {}
+	ProgressBar.Index := []
 	for i,v in LogProfile.List{
 		Group_Tab_Name .= v "|"
 	}
 	Gui, LogGUI:New, +HwndLogGUI
-	Gui, LogGUI:Add, Tab3,, %Group_Tab_Name%
-
+	Gui, LogGUI:Add, Tab3,vLogGUITabControl, %Group_Tab_Name%
 	for i,v in LogProfile.List{
 		Gui, LogGUI:Tab, %v%
 		Gui, LogGUI:Add, ListView, r20 w710 vGuiLV_%v% hwndhwndLV_%v% , Time|Func|Detail
@@ -159,6 +164,20 @@ CreateLogGUI(){
 		LV_ModifyCol(1, 80)
 		LV_ModifyCol(2, 120)
 		LV_ModifyCol(3, 500)
+		_Add_PG := LogProfile[v]._AddProgress
+		Loop, Parse, _Add_PG, %A_Space%
+		{
+			Gui, LogGUI:Add, Progress, x22 y+10 w710 h19 border +c00dd00 hwndPGBHwnd, 0
+			Gui, LogGUI:Add, Text, x27 y+-16 w240 +BackgroundTrans, %A_LoopField%
+			Gui, LogGUI:Add, Text, x12 y+-13 w700 +BackgroundTrans Center hwndTextPercent, % A_Tab "0`%"
+			if !(ProgressBar.HwndPB.HasKey(A_LoopField)){
+				ProgressBar.HwndPB[A_LoopField] := []
+				ProgressBar.HwndText[A_LoopField] := []
+				ProgressBar.Index.Push(A_LoopField)
+			}
+			ProgressBar.HwndPB[A_LoopField].push(PGBHwnd)
+			ProgressBar.HwndText[A_LoopField].push(TextPercent)
+		}
 	}
 	Gui, LogGUI:Show,, AHK - LOG
 	Gui, 1:New
@@ -184,4 +203,23 @@ LogToClip(){
 	; Set Default Back
 	Gui, %Last_DefaultGui%:Default 
 	Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
+}
+
+LogPG(Name, Percent){
+	global ProgressBar
+	for i,PGNAME in ProgressBar.Index
+	{
+		if (Name = PGNAME)
+		{
+			for i,HwndPG in ProgressBar.HwndPB[PGNAME]
+			{
+				GuiControl, , %HwndPG% , % Floor(Percent)
+			}
+			for i,HwndTX in ProgressBar.HwndText[PGNAME]
+			{
+				GuiControl, , %HwndTX% , % A_Tab Round(Percent, 2) " `%"
+			}
+		}
+	}
+
 }
