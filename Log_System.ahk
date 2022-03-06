@@ -167,6 +167,9 @@ CreateLogGUI(){
 		_Add_PG := LogProfile[v]._AddProgress
 		Loop, Parse, _Add_PG, %A_Space%
 		{
+			if(A_LoopField =""){
+				Continue
+			}
 			Gui, LogGUI:Add, Progress, x22 y+10 w710 h19 border +c00dd00 hwndPGBHwnd, 0
 			Gui, LogGUI:Add, Text, x27 y+-16 w240 +BackgroundTrans, %A_LoopField%
 			Gui, LogGUI:Add, Text, x12 y+-13 w700 +BackgroundTrans Center hwndTextPercent, % A_Tab "0`%"
