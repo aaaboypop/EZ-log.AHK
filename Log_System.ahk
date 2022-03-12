@@ -1,7 +1,9 @@
-LoadLogSetting(){
-	global LogProfile, Logs
-	FileCreateDir, %A_ScriptDir%\Logs
-	SettingPath = %A_ScriptDir%\Setting.ini
+LoadLogSetting(FilePath, ExitOnClose:=0){
+	global LogProfile, Logs, LogGuiClose
+	LogGuiClose := ExitOnClose
+	SplitPath, FilePath ,, FilePathDir
+	FileCreateDir, %FilePathDir%\Logs
+	SettingPath = %FilePath%
 	
 	If (!FileExist(SettingPath)){
 		DefaultSetting =
@@ -224,5 +226,12 @@ LogPG(Name, Percent){
 			}
 		}
 	}
+}
 
+LogGUIGuiClose(LogGUI){
+	global LogGuiClose
+	If (LogGuiClose)
+		ExitApp
+	Else
+		Gui, %LogGUI%:Hide
 }
