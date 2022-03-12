@@ -8,6 +8,10 @@ LoadLogSetting(FilePath, ExitOnClose:=0){
 	If (!FileExist(SettingPath)){
 		DefaultSetting =
 		(
+[_GuiSetting]
+x=0
+y=0
+
 [User]
 _LogLimit=999
 _WriteFile=False
@@ -29,13 +33,16 @@ Test=1
 	Logs:={}
 	LogProfile := {}
 	LogProfile.List := []
+	LogProfile._GuiSetting := {}
+	LogProfile.FilePath := FilePath
 	Loop, Parse, Setting, `n, `r
 	{
 		i := A_index
 		If RegExMatch(A_LoopField, "O)^\[(.*)\]$" , ObjMatch) ; Find ProfileName > Set Default value
 		{
 			ProfileName := ObjMatch.Value(1)
-			LogProfile[ProfileName] := {}
+			If !(LogProfile.HasKey(ProfileName))
+				LogProfile[ProfileName] := {}
 			Logs[ProfileName] := []
 			LogProfile.List.Push(ProfileName)
 			LogProfile[ProfileName]._LogLimit := 19
@@ -49,7 +56,10 @@ Test=1
 			Value := ObjMatch.Value(2)
 			LogProfile[ProfileName][KEY] := Value
 		}
-	}	
+	}
+	If 	((LogProfile._GuiSetting.x = "") or (LogProfile._GuiSetting.y = "")){
+		LogProfile._GuiSetting.x := LogProfile._GuiSetting.y := 0
+	}		
 }
 
 LogRAdd(FunctionName, LogLvArray, LogAray){
@@ -184,7 +194,9 @@ CreateLogGUI(){
 			ProgressBar.HwndText[A_LoopField].push(TextPercent)
 		}
 	}
-	Gui, LogGUI:Show,, AHK - LOG
+	GuiX := LogProfile._GuiSetting.x
+	GuiY := LogProfile._GuiSetting.y
+	Gui, LogGUI:Show, x%GuiX% y%GuiY% , AHK - LOG
 	Gui, 1:New
 }
 
@@ -229,9 +241,14 @@ LogPG(Name, Percent){
 }
 
 LogGUIGuiClose(LogGUI){
-	global LogGuiClose
-	If (LogGuiClose)
-		ExitApp
+	global LogGuiClose, LogProfile
+	If (LogGuiClose){
+		WinGetPos, X, Y, , , ahk_id %LogGUI%
+		Filename := LogProfile.FilePath
+		IniWrite, %X%, %Filename%, _GuiSetting, x
+		IniWrite, %Y%, %Filename%, _GuiSetting, y
+		ExitApp		
+	}
 	Else
 		Gui, %LogGUI%:Hide
 }
