@@ -4,9 +4,9 @@ just log system for ahk right?
 # How to Install
 just include this lib to your file
 ```
-    #Include, Log_System.ahk
-    LoadLogSetting("setting.ini", 1)
-    CreateLogGUI()
+#Include, Log_System.ahk
+LoadLogSetting("setting.ini", 1)
+CreateLogGUI()
 ```   
 LoadLogSetting(FilePath, ExitOnClose)
 **FilePath** : your config file path you want to save/read eg. "setting.ini"
@@ -61,20 +61,20 @@ now! you have 2 option to use
 # Sample
 **setting.ini**
 ```
-    [User]
-    User=1
-    
-    [TestArea]
-    Test=1
-    User=2
+[User]
+User=1
+
+[TestArea]
+Test=1
+User=2
 ```
 
 **code**
 ```
-    LogAdd("User", [1], "asdasdasdas")
-    LogAdd("Test", [1], "WOW")
-    LogRAdd("User", [1,2], ["Waiting Page", "Capturing", "Save Image"])
-    LogAdd("User", [1,2], "END")
-    LogRAdd("User", [1], ["1", "2", "3"])
+LogAdd("User", [1], "asdasdasdas")
+LogAdd("Test", [1], "WOW")
+LogRAdd("User", [1,2], ["Waiting Page", "Capturing", "Save Image"])
+LogAdd("User", [1,2], "END")
+LogRAdd("User", [1], ["1", "2", "3"])
 ```
-![Result](https://cdn.discordapp.com/attachments/867434734102511616/947617115060445225/AutoHotkey_8LMeLw59X5.png)
+![Result](https://cdn.discordapp.com/attachments/867434734102511616/952333265132466216/AutoHotkey_D2jkLE8TR1.png)

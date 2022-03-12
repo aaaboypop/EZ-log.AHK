@@ -1,6 +1,6 @@
 ﻿#Include, Log_System.ahk
 
-LoadLogSetting()
+LoadLogSetting("Setting.ini", 1)
 CreateLogGUI()
 
 SaveScr()
@@ -8,8 +8,6 @@ SaveScr()
 LogPG("aaaaaa", 50)
 LogPG("Test", 30)
 LogPG("PG1", 100)
-
-
 
 SaveScr(){
     LogAdd("User", [1], "asdasdasdas")
