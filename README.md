@@ -9,7 +9,7 @@ LoadLogSetting("setting.ini", 1)
 CreateLogGUI()
 ```   
 LoadLogSetting(FilePath, ExitOnClose) \
-**FilePath** : your config file path you want to save/read eg. "setting.ini"
+**FilePath** : your config file path you want to save/read eg. "setting.ini" \
 **ExitOnClose** : Exit when you close gui (True/False)
 
 **bam~!!** it's done. ready to work now
