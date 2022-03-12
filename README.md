@@ -3,27 +3,38 @@ just log system for ahk right?
 
 # How to Install
 just include this lib to your file
-
+```
     #Include, Log_System.ahk
-    LoadLogSetting()
+    LoadLogSetting("setting.ini", 1)
     CreateLogGUI()
-    
+```   
+LoadLogSetting(FilePath, ExitOnClose)
+**FilePath** : your config file path you want to save/read eg. "setting.ini"
+**ExitOnClose** : Exit when you close gui (True/False)
+
 **bam~!!** it's done. ready to work now
 
 # How to use
 First thing~! you must edit **Setting.ini** you will see 
+```
+[_GuiSetting]
+x=951
+y=393
 
-    [User]
-    _LogLimit=999
-    _WriteFile=False
-    _AddGUI=True
-    User=1
-    
-    [TestArea]
-    _LogLimit=999
-    _WriteFile=False
-    _AddGUI=True
-    Test=1
+[User]
+_LogLimit=999
+_WriteFile=False
+_AddGUI=True
+_AddProgress=bar1 bar3
+User=1
+
+[TestArea]
+_LogLimit=999
+_WriteFile=False
+_AddGUI=True
+_AddProgress=ssssssaaaa
+Test=1
+```
 **[ProfileName]** : This is your log profile name, Naming it's same as variable \
 **_LogLimit** : Lenth of log in profile, if log is exceed will drop oldest log (file is not effect) \
 **_WriteFile** : Enable to write log file \
@@ -31,6 +42,9 @@ First thing~! you must edit **Setting.ini** you will see
 **[FunctionName]=[LogLevel]** \
 FunctionName is FunctionName or Group of action name you want to log \
 LogLevel it's like a layer, just set them as same level you want to log 
+**_AddProgress=** : Add Progress bar to Profile Gui, it can create multiple by whitespace eg. bar1 bar2 bar3
+
+**[_GuiSetting]** : Default Profile is auto generate when you Exit Gui, It contain key x, y config start position of gui
 
 > ProfileName and FunctionName Naming it's same as variable (eg. no space)
 
@@ -46,21 +60,21 @@ now! you have 2 option to use
 
 # Sample
 **setting.ini**
-
+```
     [User]
     User=1
     
     [TestArea]
     Test=1
     User=2
-
+```
 
 **code**
-
+```
     LogAdd("User", [1], "asdasdasdas")
     LogAdd("Test", [1], "WOW")
     LogRAdd("User", [1,2], ["Waiting Page", "Capturing", "Save Image"])
     LogAdd("User", [1,2], "END")
     LogRAdd("User", [1], ["1", "2", "3"])
-
+```
 ![Result](https://cdn.discordapp.com/attachments/867434734102511616/947617115060445225/AutoHotkey_8LMeLw59X5.png)

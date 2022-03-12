@@ -2,7 +2,6 @@ LoadLogSetting(FilePath, ExitOnClose:=0){
 	global LogProfile, Logs, LogGuiClose
 	LogGuiClose := ExitOnClose
 	SplitPath, FilePath ,, FilePathDir
-	FileCreateDir, %FilePathDir%\Logs
 	SettingPath = %FilePath%
 	
 	If (!FileExist(SettingPath)){
@@ -16,7 +15,7 @@ y=0
 _LogLimit=999
 _WriteFile=False
 _AddGUI=True
-_AddProgress=PG1,PG2
+_AddProgress=PG1 PG2
 User=1
 
 [TestArea]
@@ -44,7 +43,8 @@ Test=1
 			If !(LogProfile.HasKey(ProfileName))
 				LogProfile[ProfileName] := {}
 			Logs[ProfileName] := []
-			LogProfile.List.Push(ProfileName)
+			If !(ProfileName = "_GuiSetting")
+				LogProfile.List.Push(ProfileName)
 			LogProfile[ProfileName]._LogLimit := 19
 			LogProfile[ProfileName]._WriteFile := "False"
 			LogProfile[ProfileName]._AddGUI := "True"
@@ -55,10 +55,13 @@ Test=1
 			KEY := ObjMatch.Value(1)
 			Value := ObjMatch.Value(2)
 			LogProfile[ProfileName][KEY] := Value
+			If (LogProfile[ProfileName]._WriteFile = "True")
+				FileCreateDir, %FilePathDir%\Logs
 		}
 	}
 	If 	((LogProfile._GuiSetting.x = "") or (LogProfile._GuiSetting.y = "")){
 		LogProfile._GuiSetting.x := LogProfile._GuiSetting.y := 0
+
 	}		
 }
 
@@ -126,7 +129,6 @@ LogWrite(ProfileName, Text, TimeStamp:=True){
 AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
 	If (TimeStamp){
 		FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
-		ts := ts " : "	
 	}
 
 	;Save Last
