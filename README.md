@@ -67,6 +67,7 @@ _WriteFile=False
 _AddGUI=True
 _AddProgress=PG1 Test
 User=1
+zzz=1
 
 [Profiles2]
 _LogLimit=999
