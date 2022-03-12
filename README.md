@@ -61,20 +61,38 @@ now! you have 2 option to use
 # Sample
 **setting.ini**
 ```
-[User]
+[Profiles1]
+_LogLimit=999
+_WriteFile=False
+_AddGUI=True
+_AddProgress=PG1 Test
 User=1
 
-[TestArea]
+[Profiles2]
+_LogLimit=999
+_WriteFile=False
+_AddGUI=True
+_AddProgress=PG1 aaaaaa Test
 Test=1
 User=2
 ```
 
 **code**
 ```
-LogAdd("User", [1], "asdasdasdas")
-LogAdd("Test", [1], "WOW")
-LogRAdd("User", [1,2], ["Waiting Page", "Capturing", "Save Image"])
-LogAdd("User", [1,2], "END")
-LogRAdd("User", [1], ["1", "2", "3"])
+#Include, Log_System.ahk
+LoadLogSetting("Setting.ini", 1)
+CreateLogGUI()
+zzz()
+LogPG("aaaaaa", 50)
+LogPG("Test", 30)
+LogPG("PG1", 100)
+
+zzz(){
+    LogAdd("User", [1], "asdasdasdas")
+    LogAdd("Test", [1], "WOW")
+    LogRAdd("User", [1,2], ["Waiting Page", "Capturing", "Save Image"])
+    LogAdd("User", [1,2], "END")
+    LogRAdd(A_ThisFunc, [1], ["1", "2", "3"])
+}
 ```
-![Result](https://cdn.discordapp.com/attachments/867434734102511616/952333265132466216/AutoHotkey_D2jkLE8TR1.png)
+![Result](https://cdn.discordapp.com/attachments/867434734102511616/952338701709611108/Untitled.png)
