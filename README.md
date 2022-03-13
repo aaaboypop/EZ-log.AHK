@@ -42,7 +42,7 @@ Test=1
 **[FunctionName]=[LogLevel]** \
 FunctionName is FunctionName or Group of action name you want to log \
 LogLevel it's like a layer, just set them as same level you want to log \
-**_AddProgress=** : Add Progress bar to Profile Gui, it can create multiple by whitespace eg. bar1 bar2 bar3
+**_AddProgress** : Add Progress bar to Profile Gui, it can create multiple by whitespace eg. bar1 bar2 bar3
 
 **[_GuiSetting]** : Default Profile is auto generate when you Exit Gui, It contain key x, y config start position of gui
 
