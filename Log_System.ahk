@@ -247,8 +247,10 @@ LogGUIGuiClose(LogGUI){
 	If (LogGuiClose){
 		WinGetPos, X, Y, , , ahk_id %LogGUI%
 		Filename := LogProfile.FilePath
-		IniWrite, %X%, %Filename%, _GuiSetting, x
-		IniWrite, %Y%, %Filename%, _GuiSetting, y
+		If ((x>=0) and (y>=0)){
+			IniWrite, %X%, %Filename%, _GuiSetting, x
+			IniWrite, %Y%, %Filename%, _GuiSetting, y			
+		}
 		ExitApp		
 	}
 	Else
