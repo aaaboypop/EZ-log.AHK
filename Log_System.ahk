@@ -1,12 +1,14 @@
-LoadLogSetting(FilePath, ExitOnClose:=0){
+LoadLogSetting(FilePath="", ExitOnClose:=0, DirectSetting=""){
 	global LogProfile, Logs, LogGuiClose
 	LogGuiClose := ExitOnClose
-	SplitPath, FilePath ,, FilePathDir
-	SettingPath = %FilePath%
-	
-	If (!FileExist(SettingPath)){
-		DefaultSetting =
-		(
+
+	If (Direct_Setting=""){
+		SplitPath, FilePath ,, FilePathDir
+		SettingPath = %FilePath%
+
+		If (!FileExist(SettingPath) or FilePath=""){
+			DefaultSetting =
+			(
 [_GuiSetting]
 x=0
 y=0
@@ -24,10 +26,17 @@ _WriteFile=False
 _AddGUI=True
 _AddProgress=PG3
 Test=1
-		)
-		FileAppend, %DefaultSetting%, %SettingPath%
+			)
+			FileAppend, %DefaultSetting%, %SettingPath%
+		}
+		FileRead, Setting, %SettingPath%
 	}
-	FileRead, Setting, %SettingPath%
+	Else{
+		Setting := DirectSetting
+	}
+
+	
+
 
 	Logs:={}
 	LogProfile := {}
