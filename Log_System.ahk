@@ -136,6 +136,7 @@ LogWrite(ProfileName, Text, TimeStamp:=True){
 }
 
 AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
+	global LogGUI
 	If (TimeStamp){
 		FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
 	}
@@ -144,8 +145,8 @@ AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
 	Last_DefaultGui := A_DefaultGui 
 	Last_DefaultListView := A_DefaultListView
 	;Set Default to LogGUI
-	Gui, LogGUI:Default 
-	Gui, LogGUI:ListView, GuiLV_%ProfileName%	
+	Gui, %LogGUI%:Default 
+	Gui, %LogGUI%:ListView, GuiLV_%ProfileName%	
 	LV_Add("", ts, FunctionName, Text)
 	; Set Default Back
 	Gui, %Last_DefaultGui%:Default 
@@ -158,8 +159,8 @@ LVDel_FirstRow(ProfileName){
 	Last_DefaultGui := A_DefaultGui 
 	Last_DefaultListView := A_DefaultListView
 	;Set Default to LogGUI
-	Gui, LogGUI:Default 
-	Gui, LogGUI:ListView, GuiLV_%ProfileName%	
+	Gui, %LogGUI%:Default 
+	Gui, %LogGUI%:ListView, GuiLV_%ProfileName%	
 	LV_Delete(1) ; Delete First Row
 	; Set Default Back
 	Gui, %Last_DefaultGui%:Default 
@@ -176,11 +177,11 @@ CreateLogGUI(){
 	for i,v in LogProfile.List{
 		Group_Tab_Name .= v "|"
 	}
-	Gui, LogGUI:New, +HwndLogGUI
-	Gui, LogGUI:Add, Tab3,vLogGUITabControl, %Group_Tab_Name%
+	Gui, New, +HwndLogGUI
+	Gui, %LogGUI%:Add, Tab3,vLogGUITabControl, %Group_Tab_Name%
 	for i,v in LogProfile.List{
-		Gui, LogGUI:Tab, %v%
-		Gui, LogGUI:Add, ListView, r20 w710 vGuiLV_%v% hwndhwndLV_%v% , Time|Func|Detail
+		Gui, %LogGUI%:Tab, %v%
+		Gui, %LogGUI%:Add, ListView, r20 w710 vGuiLV_%v% hwndhwndLV_%v% , Time|Func|Detail
 		fn := Func("LogToClip").Bind()
 		hwndlv := hwndLV_%v%
 		GuiControl, +g, %hwndlv% , %fn%
@@ -193,9 +194,9 @@ CreateLogGUI(){
 			if(A_LoopField =""){
 				Continue
 			}
-			Gui, LogGUI:Add, Progress, x22 y+10 w710 h19 border +c00dd00 hwndPGBHwnd, 0
-			Gui, LogGUI:Add, Text, x27 y+-16 w240 +BackgroundTrans, %A_LoopField%
-			Gui, LogGUI:Add, Text, x12 y+-13 w700 +BackgroundTrans Center hwndTextPercent, % A_Tab "0`%"
+			Gui, %LogGUI%:Add, Progress, x22 y+10 w710 h19 border +c00dd00 hwndPGBHwnd, 0
+			Gui, %LogGUI%:Add, Text, x27 y+-16 w240 +BackgroundTrans, %A_LoopField%
+			Gui, %LogGUI%:Add, Text, x12 y+-13 w700 +BackgroundTrans Center hwndTextPercent, % A_Tab "0`%"
 			if !(ProgressBar.HwndPB.HasKey(A_LoopField)){
 				ProgressBar.HwndPB[A_LoopField] := []
 				ProgressBar.HwndText[A_LoopField] := []
@@ -207,7 +208,7 @@ CreateLogGUI(){
 	}
 	GuiX := LogProfile._GuiSetting.x
 	GuiY := LogProfile._GuiSetting.y
-	Gui, LogGUI:Show, x%GuiX% y%GuiY% , AHK - LOG
+	Gui, %LogGUI%:Show, x%GuiX% y%GuiY% , AHK - LOG
 	Gui, 1:New
 }
 
@@ -217,8 +218,8 @@ LogToClip(){
 	Last_DefaultGui := A_DefaultGui 
 	Last_DefaultListView := A_DefaultListView
 	;Set Default to LogGUI
-	Gui, LogGUI:Default 
-	Gui, LogGUI:ListView, %A_GuiControl%
+	Gui, %LogGUI%:Default 
+	Gui, %LogGUI%:ListView, %A_GuiControl%
 
 	if (A_GuiEvent = "DoubleClick")
 	{
