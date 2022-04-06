@@ -1,8 +1,8 @@
-LoadLogSetting(FilePath="", ExitOnClose:=0, DirectSetting=""){
+LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:=""){
 	global LogProfile, Logs, LogGuiClose
 	LogGuiClose := ExitOnClose
 
-	If (Direct_Setting=""){
+	If (DirectSetting=""){
 		SplitPath, FilePath ,, FilePathDir
 		SettingPath = %FilePath%
 
