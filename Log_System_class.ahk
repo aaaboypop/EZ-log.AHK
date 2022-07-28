@@ -106,7 +106,7 @@ Test=1
 				If (LogLV = LogProfileLV){
 					This.Logs[ProfileName].Push(Text)
 
-					While(Logs[ProfileName].Length() >= This.LogProfile[ProfileName]._LogLimit){
+					While(This.Logs[ProfileName].Length() >= This.LogProfile[ProfileName]._LogLimit){
 						This.Logs[ProfileName].RemoveAt(1)
 						This.LVDel_FirstRow(ProfileName)
 					}
