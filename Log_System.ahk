@@ -8,26 +8,26 @@ LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:=""){
 
 		If (!FileExist(SettingPath) or FilePath=""){
 			DefaultSetting =
-			(
-[_GuiSetting]
-x=0
-y=0
+			(LTrim
+				[_GuiSetting]
+				x=0
+				y=0
 
-[User]
-_LogLimit=999
-_WriteFile=False
-_AddGUI=True
-_AddProgress=PG1 PG2
-User=1
+				[User]
+				_LogLimit=999
+				_WriteFile=False
+				_AddGUI=True
+				_AddProgress=PG1 PG2
+				User=1
 
-[TestArea]
-_LogLimit=999
-_WriteFile=False
-_AddGUI=True
-_AddProgress=PG3
-Test=1
+				[TestArea]
+				_LogLimit=999
+				_WriteFile=False
+				_AddGUI=True
+				_AddProgress=PG3
+				Test=1
 			)
-			FileAppend, %DefaultSetting%, %SettingPath%
+			LogAppend(DefaultSetting, SettingPath)
 		}
 		FileRead, Setting, %SettingPath%
 	}
@@ -132,7 +132,7 @@ LogWrite(ProfileName, Text, TimeStamp:=True){
 		FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
 		ts := ts " : "	
 	}
-	FileAppend, % ts Text "`n", %A_ScriptDir%\logs\Log_%ProfileName%.log
+	LogAppend(ts Text "`n", A_ScriptDir "\logs\Log_" ProfileName ".log")
 }
 
 AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
@@ -265,4 +265,10 @@ LogGUIGuiClose(LogGUI){
 	}
 	Else
 		Gui, %LogGUI%:Hide
+}
+
+LogAppend(text, path){
+	f := FileOpen(path, "a")
+    f.Write(text)
+	f.Close()
 }
