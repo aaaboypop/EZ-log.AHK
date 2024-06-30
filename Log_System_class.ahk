@@ -8,31 +8,31 @@ class LogSystem{
 
 			If (!FileExist(SettingPath) or FilePath=""){
 				DefaultSetting =
-				(
-[_GuiSetting]
-x=0
-y=0
+				(LTrim
+					[_GuiSetting]
+					x=0
+					y=0
 
-[User]
-_LogLimit=999
-_WriteFile=False
-_AddGUI=True
-_AddProgress=PG1 PG2
-User=1
+					[User]
+					_LogLimit=999
+					_WriteFile=False
+					_AddGUI=True
+					_AddProgress=PG1
+					User=1
 
-[TestArea]
-_LogLimit=999
-_WriteFile=False
-_AddGUI=True
-_AddProgress=PG3
-Test=1
+					[CMD]
+					_LogLimit=999
+					_WriteFile=False
+					_AddGUI=True
+					_AddProgress=PG2
+					Test=1
 				)
-				FileAppend, %DefaultSetting%, %SettingPath%
+				This.LogAppend(DefaultSetting, SettingPath)
 			}
 			FileRead, Setting, %SettingPath%
 		}
 		Else{
-			Setting := DirectSetting
+			Setting := LTrim(DirectSetting)
 		}
 
 		This.Logs:={}
@@ -127,7 +127,7 @@ Test=1
 			FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
 			ts := ts " : "	
 		}
-		FileAppend, % ts Text "`n", %A_ScriptDir%\logs\Log_%ProfileName%.log
+		This.LogAppend(ts Text "`n", A_ScriptDir "\logs\Log_" ProfileName ".log")
 	}
 
 	AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
@@ -245,6 +245,12 @@ Test=1
 				}
 			}
 		}
+	}
+
+	LogAppend(text, path){
+		f := FileOpen(path, "a")
+		f.Write(text)
+		f.Close()
 	}
 
 	__Delete() {
