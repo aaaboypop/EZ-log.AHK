@@ -1,4 +1,4 @@
-#Include, C:\Users\PONDX\Desktop\script graveyard\EZ-log.AHK-main\Log_System_class.ahk
+#Include, Log_System_class.ahk
 
 ; LogSystem parameters
 ; FilePath := ""          setting file path
