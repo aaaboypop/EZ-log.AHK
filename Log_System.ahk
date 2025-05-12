@@ -1,5 +1,6 @@
-LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:=""){
-	global LogProfile, Logs, LogGuiClose
+LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:="",StartHideGUI:=0, LogFileDir:=""){
+	global LogProfile, Logs, LogGuiClose, LogFilePath, HideGUI
+	HideGUI := StartHideGUI
 	LogGuiClose := ExitOnClose
 
 	If (DirectSetting=""){
@@ -8,7 +9,7 @@ LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:=""){
 
 		If (!FileExist(SettingPath) or FilePath=""){
 			DefaultSetting =
-			(LTrim
+			( LTrim
 				[_GuiSetting]
 				x=0
 				y=0
@@ -27,15 +28,16 @@ LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:=""){
 				_AddProgress=PG3
 				Test=1
 			)
-			LogAppend(DefaultSetting, SettingPath)
+			FileAppend, %DefaultSetting%, %SettingPath%
 		}
 		FileRead, Setting, %SettingPath%
 	}
 	Else{
-		Setting := DirectSetting
+		Setting := RemoveEmptyLines(DirectSetting)
 	}
 
-	
+	LogPrefix := "Log_"
+	LogFileDir := (LogFileDir="")? (A_ScriptDir "\logs") : (LogFileDir)
 
 
 	Logs:={}
@@ -64,22 +66,23 @@ LoadLogSetting(FilePath:="", ExitOnClose:=0, DirectSetting:=""){
 			KEY := ObjMatch.Value(1)
 			Value := ObjMatch.Value(2)
 			LogProfile[ProfileName][KEY] := Value
-			If (LogProfile[ProfileName]._WriteFile = "True")
-				FileCreateDir, %FilePathDir%\Logs
+			If (LogProfile[ProfileName]._WriteFile = "True"){
+					FileCreateDir, %LogFileDir%
+			}
 		}
 	}
 	If 	((LogProfile._GuiSetting.x = "") or (LogProfile._GuiSetting.y = "")){
 		LogProfile._GuiSetting.x := LogProfile._GuiSetting.y := 0
-
-	}		
+	}
+	LogFilePath := LogFileDir "\" LogPrefix
 }
 
-LogRAdd(FunctionName, LogLvArray, LogAray){
+LogRAdd(Namespace, LogLvArray, LogAray){
 	global LogProfile, Logs
 
 	for a, LogLV in LogLvArray{
 		for i,ProfileName in LogProfile.List{
-			LogProfileLV := LogProfile[ProfileName][FunctionName]
+			LogProfileLV := LogProfile[ProfileName][Namespace]
 			If (LogLV = LogProfileLV){
 				For i, Text in LogAray{
 					Logs[ProfileName].Push(Text)
@@ -93,7 +96,7 @@ LogRAdd(FunctionName, LogLvArray, LogAray){
 						LogWrite(ProfileName, Text)
 					}
 					If(LogProfile[ProfileName]._AddGUI = "True"){
-						AddGuiLog(ProfileName, FunctionName ,Text)
+						AddGuiLog(ProfileName, Namespace ,Text)
 					}
 				}
 			}
@@ -101,12 +104,12 @@ LogRAdd(FunctionName, LogLvArray, LogAray){
 	}
 }
 
-LogAdd(FunctionName, LogLvArray, Text){
+LogAdd(Namespace, LogLvArray, Text){
 	global LogProfile, Logs
 
 	for a, LogLV in LogLvArray{
 		for i,ProfileName in LogProfile.List{
-			LogProfileLV := LogProfile[ProfileName][FunctionName]
+			LogProfileLV := LogProfile[ProfileName][Namespace]
 			
 			If (LogLV = LogProfileLV){
 				Logs[ProfileName].Push(Text)
@@ -120,7 +123,7 @@ LogAdd(FunctionName, LogLvArray, Text){
 					LogWrite(ProfileName, Text)
 				}
 				If(LogProfile[ProfileName]._AddGUI = "True"){
-					AddGuiLog(ProfileName, FunctionName ,Text)
+					AddGuiLog(ProfileName, Namespace ,Text)
 				}
 			}
 		}	
@@ -132,10 +135,19 @@ LogWrite(ProfileName, Text, TimeStamp:=True){
 		FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
 		ts := ts " : "	
 	}
-	LogAppend(ts Text "`n", A_ScriptDir "\logs\Log_" ProfileName ".log")
+	FileAppend, % ts Text "`n", %LogFilePath%%ProfileName%.log
 }
 
-AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
+LogGuiHide(){
+	global LogGUI
+	Gui, %LogGUI%:Hide
+}
+LogGuiShow(){
+	global LogGUI
+	Gui, %LogGUI%:Show
+}
+
+AddGuiLog(ProfileName, Namespace ,Text, TimeStamp:=True){
 	global LogGUI
 	If (TimeStamp){
 		FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
@@ -147,7 +159,7 @@ AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
 	;Set Default to LogGUI
 	Gui, %LogGUI%:Default 
 	Gui, %LogGUI%:ListView, GuiLV_%ProfileName%	
-	LV_Add("", ts, FunctionName, Text)
+	LV_Add("", ts, Namespace, Text)
 	; Set Default Back
 	Gui, %Last_DefaultGui%:Default 
 	Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
@@ -178,10 +190,11 @@ CreateLogGUI(){
 		Group_Tab_Name .= v "|"
 	}
 	Gui, New, +HwndLogGUI
+	events := new EventHook(LogGUI, controls, LogGuiClose)
 	Gui, %LogGUI%:Add, Tab3,vLogGUITabControl, %Group_Tab_Name%
 	for i,v in LogProfile.List{
 		Gui, %LogGUI%:Tab, %v%
-		Gui, %LogGUI%:Add, ListView, r20 w710 vGuiLV_%v% hwndhwndLV_%v% , Time|Func|Detail
+		Gui, %LogGUI%:Add, ListView, r20 w710 vGuiLV_%v% hwndhwndLV_%v% , Time|Name|Detail
 		fn := Func("LogToClip").Bind()
 		hwndlv := hwndLV_%v%
 		GuiControl, +g, %hwndlv% , %fn%
@@ -208,7 +221,9 @@ CreateLogGUI(){
 	}
 	GuiX := LogProfile._GuiSetting.x
 	GuiY := LogProfile._GuiSetting.y
-	Gui, %LogGUI%:Show, x%GuiX% y%GuiY% , AHK - LOG
+	if (!HideGUI){
+		Gui, %LogGUI%:Show, x%GuiX% y%GuiY% , AHK - LOG
+	}
 	Gui, 1:New
 }
 
@@ -252,23 +267,66 @@ LogPG(Name, Percent){
 	}
 }
 
-LogGUIGuiClose(LogGUI){
-	global LogGuiClose, LogProfile
-	If (LogGuiClose){
-		WinGetPos, X, Y, , , ahk_id %LogGUI%
-		Filename := LogProfile.FilePath
-		If ((x>=0) and (y>=0)){
-			IniWrite, %X%, %Filename%, _GuiSetting, x
-			IniWrite, %Y%, %Filename%, _GuiSetting, y			
-		}
-		ExitApp		
+
+class EventHook
+{
+	__New(hGui, controls, ExitOnClose) {
+		this.ExitOnClose := ExitOnClose
+    	this.hGui := hGui
+		this.controls := controls
+		this.OnResize := ObjBindMethod(this, "WM_SIZE")
+		this.OnSysCommand := ObjBindMethod(this, "WM_SYSCOMMAND")
+		OnMessage(0x5, this.OnResize)
+		OnMessage(0x112, this.OnSysCommand)
 	}
-	Else
-		Gui, %LogGUI%:Hide
+	
+	WM_SIZE(wp, lp) {
+		static SIZE_MINIMIZED := 1
+		if (A_Gui == this.hGui && wp = SIZE_MINIMIZED){
+			WinHide, % "ahk_id " this.hGui
+		}
+	}
+
+	WM_SYSCOMMAND(wp, lp) {
+		static SC_CLOSE := 0xF060
+		if (A_Gui != this.hGui)
+			Return
+		
+		if (wp = SC_CLOSE) {
+			If (this.ExitOnClose){
+				MsgBox, 4, % " ", Do you want to Exit App?
+				IfMsgBox, No
+					Return 1
+				
+				this.Clear()
+				ExitApp
+			}
+			Else{
+				MsgBox, 4, % " ", Do you want to hide the window?
+				IfMsgBox, No
+					Return 1
+				
+				Gui, %A_Gui%: Hide
+			}
+		}
+	}
+	
+	Clear() {
+		OnMessage(0x112, this.OnSysCommand, 0)
+		this.OnSysCommand := ""
+		this.Clear := ""
+	}
 }
 
-LogAppend(text, path){
-	f := FileOpen(path, "a")
-    f.Write(text)
-	f.Close()
+RemoveEmptyLines(str) {
+    out := ""
+    Loop, Parse, str, `n, `r
+    {
+        line := A_LoopField
+        if !RegExMatch(line, "^\s*$") {
+            line := LTrim(line)
+            out .= line "`n"
+        }
+    }
+    return RTrim(out, "`n")
 }
