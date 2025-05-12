@@ -1,6 +1,6 @@
 
 class LogSystem{
-	__New(FilePath:="", ExitOnClose:=0, DirectSetting:="", CreateGUI:=True){
+	__New(FilePath:="", ExitOnClose:=0, DirectSetting:="", HideGUI:=0, LogFileDir:=""){
 		This.ExitOnClose := ExitOnClose
 		If (DirectSetting=""){
 			SplitPath, FilePath ,, FilePathDir
@@ -32,8 +32,11 @@ class LogSystem{
 			FileRead, Setting, %SettingPath%
 		}
 		Else{
-			Setting := LTrim(DirectSetting)
+			Setting := RemoveEmptyLines(DirectSetting)
 		}
+
+		LogPrefix := "Log_"
+		LogFileDir := (LogFileDir="")? (A_ScriptDir "\logs") : (LogFileDir)
 
 		This.Logs:={}
 		This.LogProfile := {}
@@ -61,22 +64,22 @@ class LogSystem{
 				KEY := ObjMatch.Value(1)
 				Value := ObjMatch.Value(2)
 				This.LogProfile[ProfileName][KEY] := Value
-				If (This.LogProfile[ProfileName]._WriteFile = "True")
-					FileCreateDir, %FilePathDir%\Logs
+				If (This.LogProfile[ProfileName]._WriteFile = "True"){
+					FileCreateDir, %LogFileDir%
+				}
 			}
 		}
 		If 	((This.LogProfile._GuiSetting.x = "") or (This.LogProfile._GuiSetting.y = "")){
 			This.LogProfile._GuiSetting.x := This.LogProfile._GuiSetting.y := 0
-
 		}	
-		If (CreateGUI)
-			This.CreateLogGUI()
+		This.LogFilePath := LogFileDir "\" LogPrefix
+		This.CreateLogGUI(HideGUI)
 	}
 
-	LogRAdd(FunctionName, LogLvArray, LogAray){
+	LogRAdd(Namespace, LogLvArray, LogAray){
 		for a, LogLV in LogLvArray{
 			for i,ProfileName in This.LogProfile.List{
-				LogProfileLV := This.LogProfile[ProfileName][FunctionName]
+				LogProfileLV := This.LogProfile[ProfileName][Namespace]
 				If (LogLV = LogProfileLV){
 					For i, Text in LogAray{
 						This.Logs[ProfileName].Push(Text)
@@ -90,7 +93,7 @@ class LogSystem{
 							This.LogWrite(ProfileName, Text)
 						}
 						If(This.LogProfile[ProfileName]._AddGUI = "True"){
-							This.AddGuiLog(ProfileName, FunctionName ,Text)
+							This.AddGuiLog(ProfileName, Namespace ,Text)
 						}
 					}
 				}
@@ -98,10 +101,10 @@ class LogSystem{
 		}
 	}
 
-	LogAdd(FunctionName, LogLvArray, Text){
+	LogAdd(Namespace, LogLvArray, Text){
 		for a, LogLV in LogLvArray{
 			for i,ProfileName in This.LogProfile.List{
-				LogProfileLV := This.LogProfile[ProfileName][FunctionName]
+				LogProfileLV := This.LogProfile[ProfileName][Namespace]
 				
 				If (LogLV = LogProfileLV){
 					This.Logs[ProfileName].Push(Text)
@@ -115,7 +118,7 @@ class LogSystem{
 						This.LogWrite(ProfileName, Text)
 					}
 					If(This.LogProfile[ProfileName]._AddGUI = "True"){
-						This.AddGuiLog(ProfileName, FunctionName ,Text)
+						This.AddGuiLog(ProfileName, Namespace ,Text)
 					}
 				}
 			}	
@@ -127,10 +130,19 @@ class LogSystem{
 			FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
 			ts := ts " : "	
 		}
-		This.LogAppend(ts Text "`n", A_ScriptDir "\logs\Log_" ProfileName ".log")
+		This.LogAppend(ts Text "`n", This.LogFilePath . ProfileName ".log")
 	}
 
-	AddGuiLog(ProfileName, FunctionName ,Text, TimeStamp:=True){
+	GuiHide(){
+		LogGUI := This.LogGUI
+		Gui, %LogGUI%:Hide
+	}
+	GuiShow(){
+		LogGUI := This.LogGUI
+		Gui, %LogGUI%:Show
+	}
+
+	AddGuiLog(ProfileName, Namespace ,Text, TimeStamp:=True){
 		LogGUI := This.LogGUI
 		If (TimeStamp){
 			FormatTime, ts , YYYYMMDDHH24MISS, HH:mm:ss
@@ -142,7 +154,7 @@ class LogSystem{
 		;Set Default to LogGUI
 		Gui, %LogGUI%:Default 
 		Gui, %LogGUI%:ListView, % This.LVHwnd[ProfileName]
-		LV_Add("", ts, FunctionName, Text)
+		LV_Add("", ts, Namespace, Text)
 		; Set Default Back
 		Gui, %Last_DefaultGui%:Default 
 		Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
@@ -161,7 +173,7 @@ class LogSystem{
 		Gui, %Last_DefaultGui%:ListView, %Last_DefaultListView%	
 	}
 
-	CreateLogGUI(){
+	CreateLogGUI(HideGUI){
 		This.ProgressBar := {}
 		This.ProgressBar.HwndPB := {}
 		This.ProgressBar.HwndText := {}
@@ -176,7 +188,7 @@ class LogSystem{
 		Gui, %LogGUI%:Add, Tab3,, %Group_Tab_Name%
 		for i,ProfileName in This.LogProfile.List{
 			Gui, %LogGUI%:Tab, %ProfileName%
-			Gui, %LogGUI%:Add, ListView, r20 w710 hwndhwndLV , Time|Func|Detail
+			Gui, %LogGUI%:Add, ListView, r20 w710 hwndhwndLV , Time|Name|Detail
 			This.LVHwnd[ProfileName] := hwndLV
 			BoundFunc := ObjBindMethod(This, "LogToClip")
 			GuiControl, +g, %hwndlv% , %BoundFunc%
@@ -203,7 +215,9 @@ class LogSystem{
 		}
 		GuiX := This.LogProfile._GuiSetting.x
 		GuiY := This.LogProfile._GuiSetting.y
-		Gui, %LogGUI%:Show, x%GuiX% y%GuiY% , AHK - LOG
+		if (!HideGUI){
+			Gui, %LogGUI%:Show, x%GuiX% y%GuiY% , AHK - LOG
+		}
 		Gui, 1:New
 	}
 
@@ -302,17 +316,15 @@ class LogSystem{
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+RemoveEmptyLines(str) {
+    out := ""
+    Loop, Parse, str, `n, `r
+    {
+        line := A_LoopField
+        if !RegExMatch(line, "^\s*$") {
+            line := LTrim(line)
+            out .= line "`n"
+        }
+    }
+    return RTrim(out, "`n")
+}
